@@ -33,6 +33,5 @@ return [
     'external_api' => [
         'url' => env('EXTERNAL_API_URL'),
         'key' => env('EXTERNAL_API_KEY'),
-        'services_path' => 'services.json',
     ],
 ];
