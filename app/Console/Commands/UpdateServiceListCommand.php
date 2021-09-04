@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Exceptions\ExternalApiException;
 use App\Services\ExternalApi\Client;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
@@ -32,7 +33,12 @@ class UpdateServiceListCommand extends Command
     {
         // Get services from external API
         $this->info('Getting services from external API...');
-        $services = $client->getServices();
+        try {
+            $services = $client->getServices();
+        } catch (ExternalApiException $e) {
+            $this->error($e->getMessage());
+            return 1;
+        }
         $this->info(sprintf("%d services received from external API", count($services)));
 
         // Save into the file

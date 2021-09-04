@@ -4,6 +4,7 @@
 namespace App\Services\ExternalApi;
 
 
+use App\Exceptions\ExternalApiException;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -42,6 +43,7 @@ class Client
      * @param string $method
      * @param array $options
      * @return array|null
+     * @throws ExternalApiException
      */
     protected function request(string $url = '', string $method = 'GET', array $options = []): ?array
     {
@@ -55,8 +57,7 @@ class Client
         try {
             $response = $this->client->request($method, $url, $options);
         } catch (GuzzleException $e) {
-            // TODO: Process error
-            return null;
+            throw new ExternalApiException('Error while executing request', 0, $e, $url);
         }
 
         return json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
@@ -64,6 +65,7 @@ class Client
 
     /**
      * @return array
+     * @throws ExternalApiException
      */
     public function getServices(): array
     {

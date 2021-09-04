@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\InstagramParserController;
 use App\Http\Controllers\ServicesController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +16,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('services', [ServicesController::class, 'index']);
+Route::get('instagram/profile', [InstagramParserController::class, 'profile']);
