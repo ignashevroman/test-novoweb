@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Exceptions\ExternalApiException;
+use App\Models\Service;
 use App\Services\ExternalApi\Client;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 
 class UpdateServiceListCommand extends Command
 {
@@ -21,7 +21,7 @@ class UpdateServiceListCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command gets service list from the external api and saves it into storage';
+    protected $description = 'Command gets service list from the external api and saves them into DB';
 
     /**
      * Execute the console command.
@@ -32,6 +32,22 @@ class UpdateServiceListCommand extends Command
     public function handle(Client $client): int
     {
         // Get services from external API
+        $services = $this->loadServices($client);
+        if (is_int($services)) {
+            return $services;
+        }
+
+        // Save them
+        $this->saveServicesIntoDatabase($services);
+        return 0;
+    }
+
+    /**
+     * @param Client $client
+     * @return int|array
+     */
+    protected function loadServices(Client $client)
+    {
         $this->info('Getting services from external API...');
         try {
             $services = $client->getServices();
@@ -41,10 +57,21 @@ class UpdateServiceListCommand extends Command
         }
         $this->info(sprintf("%d services received from external API", count($services)));
 
-        // Save into the file
-        Storage::put(config('services.external_api.services_path'), json_encode($services, JSON_THROW_ON_ERROR));
-        $this->info("Saving into a file completed");
+        return $services;
+    }
 
-        return 0;
+    /**
+     * @param array $services
+     */
+    protected function saveServicesIntoDatabase(array $services): void
+    {
+        $primary = (new Service())->getKeyName();
+        Service::upsert(
+            $services,
+            [$primary],
+            array_diff(array_keys(array_shift($services)), [$primary])
+        );
+
+        $this->info("Saving into database completed");
     }
 }

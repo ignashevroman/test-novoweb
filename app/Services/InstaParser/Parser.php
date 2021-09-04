@@ -8,6 +8,7 @@ use App\Exceptions\InstagramParserException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class Parser
@@ -21,10 +22,17 @@ class Parser
     protected $client;
 
     /**
-     * Parser constructor.
+     * @var LoggerInterface
      */
-    public function __construct()
+    protected $logger;
+
+    /**
+     * Parser constructor.
+     * @param LoggerInterface $logger
+     */
+    public function __construct(LoggerInterface $logger)
     {
+        $this->logger = $logger;
 
         $this->client = new Client(
             [
