@@ -57,6 +57,20 @@ services:
             retries: 3
             timeout: 5s
 
+    rabbitmq:
+        image: rabbitmq:3-management-alpine
+        volumes:
+            - sailrabbitmq:/var/lib/rabbitmq
+        environment:
+            RABBITMQ_DEFAULT_USER: '${RABBITMQ_USER:-guest}'
+            RABBITMQ_DEFAULT_PASS: '${RABBITMQ_PASS:-guest}'
+            RABBITMQ_DEFAULT_VHOST: '${RABBITMQ_VHOST:-/}'
+        ports:
+            - '${RABBITMQ_PORT:-5672}:5672'
+            - '${RABBITMQ_MANAGEMENT_PORT:-15672}:15672'
+        networks:
+            - sail
+
 networks:
     sail:
         driver: bridge
@@ -64,4 +78,6 @@ volumes:
     sailmysql:
         driver: local
     sailredis:
+        driver: local
+    sailrabbitmq:
         driver: local
