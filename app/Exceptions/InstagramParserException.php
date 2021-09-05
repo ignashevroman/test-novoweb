@@ -34,6 +34,11 @@ class InstagramParserException extends Exception
      */
     public function render(): ApiResponse
     {
-        return ApiResponse::error('Failed to parse instagram ' . $this->url, Response::HTTP_INTERNAL_SERVER_ERROR);
+        return ApiResponse::error($this->getUserMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    public function getUserMessage(): string
+    {
+        return 'Failed to parse instagram ' . $this->url;
     }
 }

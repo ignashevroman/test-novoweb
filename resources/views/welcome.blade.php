@@ -1,27 +1,17 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layout.app')
 
-        <title>{{ config('app.name') }}</title>
-
-        <!-- Scripts -->
-        <script src="{{ asset('js/app.js') }}"></script>
-
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
-
-        <!-- Styles -->
-        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-
-        <style>
-            body {
-                font-family: 'Nunito', sans-serif;
-            }
-        </style>
-    </head>
-    <body>
-
-    </body>
-</html>
+@section('content')
+    <div class="d-flex align-items-center justify-content-center" style="height: 100vh">
+        <form action="{{ route('orders.create') }}" method="GET" class="form">
+            <div class="form-group">
+                <input class="form-control @error('url') is-invalid @enderror" name="url" placeholder="Instagram profile URL"
+                       required type="text">
+                @error('url')
+                    <div class="invalid-feedback" role="alert">
+                        {{ $message }}
+                    </div>
+                @enderror
+            </div>
+        </form>
+    </div>
+@endsection

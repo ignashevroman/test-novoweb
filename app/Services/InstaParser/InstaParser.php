@@ -9,7 +9,7 @@ use App\Models\Profile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 
-class Service
+class InstaParser
 {
     /**
      * @var Parser
