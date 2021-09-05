@@ -35,17 +35,27 @@ class Service
         $fresh = false;
         $profile = Cache::get($url);
         if (!$profile) {
+            // If there's no profile in cache
+            // then get it from parser and save in cache for a week
             $fresh = true;
             $profile = $this->parser->getProfile($url);
             Cache::add($url, $profile, 3600 * 24 * 7);
         }
 
+        // Add url to save into database
+        if (!array_key_exists('url', $profile)) {
+            $profile['url'] = $url;
+        }
+
         if ($fresh) {
+            // If data is fresh we need to update or create new one
             $model = Profile::updateOrCreate(
                 Arr::only($profile, ['id']),
                 Arr::except($profile, ['id'])
             );
         } else {
+            // If data already was in cache
+            // then just get it from database and create if not exists
             $model = Profile::firstOrCreate(
                 Arr::only($profile, ['id']),
                 Arr::except($profile, ['id'])

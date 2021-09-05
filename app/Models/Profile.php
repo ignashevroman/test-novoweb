@@ -28,5 +28,6 @@ class Profile extends Model
         'username',
         'profile_pic_url',
         'profile_pic_url_hd',
+        'url',
     ];
 }
