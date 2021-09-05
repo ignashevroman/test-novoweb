@@ -7,12 +7,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Class Order
+ * @package App\Models
+ *
+ * @property string $id
+ */
 class Order extends Model
 {
     use HasFactory;
     use UsesUuid;
 
     protected $fillable = [
+        'profile_id',
+        'service_id',
         'quantity_of_completed',
         'quantity',
         'charge',

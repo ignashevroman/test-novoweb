@@ -30,12 +30,17 @@
                 @endforeach
             </div>
 
-            <div class="d-flex gap-3">
+            <div class="d-flex gap-3 align-items-start">
                 <!-- Quantity field -->
                 <div class="quantity flex-grow-1">
-                    <input type="number" name="quantity" class="form-control" value="1000"
+                    <input type="number" name="quantity" class="form-control @error('quantity') is-invalid @enderror" value="{{ old('quantity', 1000) }}"
                            min="{{ optional($defaultService)->min }}" max="{{ optional($defaultService)->max }}"
                            required>
+                    @error('quantity')
+                        <span class="invalid-feedback" role="alert">
+                            {{ $message }}
+                        </span>
+                    @enderror
                 </div>
 
                 <!-- Submit button -->

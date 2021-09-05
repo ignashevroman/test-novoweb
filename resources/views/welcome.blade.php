@@ -5,11 +5,11 @@
         <form action="{{ route('orders.create') }}" method="GET" class="form">
             <div class="form-group">
                 <input class="form-control @error('url') is-invalid @enderror" name="url" placeholder="Instagram profile URL"
-                       required type="text">
+                       required type="text" value="{{ old('url') }}">
                 @error('url')
-                    <div class="invalid-feedback" role="alert">
+                    <span class="invalid-feedback" role="alert">
                         {{ $message }}
-                    </div>
+                    </span>
                 @enderror
             </div>
         </form>

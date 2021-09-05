@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Model;
  * Class Service
  * @package App\Models
  *
- * @method static int upsert(array $values, array|string $uniqueBy, array|null $update = null)
+ * @property int $rate
+ * @property int $min
+ * @property int $max
  */
 class Service extends Model
 {
@@ -44,4 +46,13 @@ class Service extends Model
         'dripfeed',
         'average_time',
     ];
+
+    /**
+     * @return float|int
+     */
+    public function getRatePerOne()
+    {
+        return $this->rate / 1000;
+    }
+
 }

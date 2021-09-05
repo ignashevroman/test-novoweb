@@ -49,17 +49,21 @@ class InstaParser
 
         if ($fresh) {
             // If data is fresh we need to update or create new one
-            $model = Profile::updateOrCreate(
-                Arr::only($profile, ['id']),
-                Arr::except($profile, ['id'])
-            );
+            /** @var Profile $model */
+            $model = Profile::query()
+                ->updateOrCreate(
+                    Arr::only($profile, ['id']),
+                    Arr::except($profile, ['id'])
+                );
         } else {
             // If data already was in cache
             // then just get it from database and create if not exists
-            $model = Profile::firstOrCreate(
-                Arr::only($profile, ['id']),
-                Arr::except($profile, ['id'])
-            );
+            /** @var Profile $model */
+            $model = Profile::query()
+                ->firstOrCreate(
+                    Arr::only($profile, ['id']),
+                    Arr::except($profile, ['id'])
+                );
         }
 
         return $model;

@@ -66,11 +66,12 @@ class UpdateServiceListCommand extends Command
     protected function saveServicesIntoDatabase(array $services): void
     {
         $primary = (new Service())->getKeyName();
-        Service::upsert(
-            $services,
-            [$primary],
-            array_diff(array_keys(array_shift($services)), [$primary])
-        );
+        Service::query()
+            ->upsert(
+                $services,
+                [$primary],
+                array_diff(array_keys(array_shift($services)), [$primary])
+            );
 
         $this->info("Saving into database completed");
     }
