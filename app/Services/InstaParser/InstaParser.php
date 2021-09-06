@@ -33,6 +33,10 @@ class InstaParser
      */
     public function getProfile(string $url): Profile
     {
+        // Clean url from query params etc
+        // So we can limit extra request to instagram
+        $url = $this->clearUrl($url);
+
         $fresh = false;
         $profile = Cache::get($url);
         if (!$profile) {
@@ -72,6 +76,19 @@ class InstaParser
         }
 
         return $model;
+    }
+
+    /**
+     * Returns base url without params
+     * Example: https://www.instagram.com/zuck?hl=ru -> https://www.instagram.com/zuck
+     *
+     * @param string $url
+     * @return string
+     */
+    protected function clearUrl(string $url): string
+    {
+        $urlData = parse_url($url);
+        return sprintf('%s://%s%s', $urlData['scheme'], $urlData['host'], $urlData['path']);
     }
 
     /**
