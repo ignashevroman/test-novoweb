@@ -27,7 +27,7 @@ class QuantityIsNotOutOfRange implements Rule
      */
     public function passes($attribute, $value): bool
     {
-        $service = Service::find(app(Request::class)->get('service_id'));
+        $service = Service::query()->find(app(Request::class)->get('service_id'));
 
         return !($value < $service->min || $value > $service->max);
     }

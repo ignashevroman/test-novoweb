@@ -8,6 +8,7 @@ use App\Exceptions\InstagramParserException;
 use App\Models\Profile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class InstaParser
 {
@@ -47,6 +48,10 @@ class InstaParser
             $profile['url'] = $url;
         }
 
+        // Store avatar to bypass cross-origin
+        $avatars = $this->saveAvatars($profile);
+        $profile = array_merge($profile, $avatars);
+
         if ($fresh) {
             // If data is fresh we need to update or create new one
             /** @var Profile $model */
@@ -67,5 +72,28 @@ class InstaParser
         }
 
         return $model;
+    }
+
+    /**
+     * @param array $profile
+     * @return array
+     */
+    protected function saveAvatars(array $profile): array
+    {
+        $avatars = [];
+        foreach (['profile_pic_url', 'profile_pic_url_hd'] as $field) {
+            $file = Arr::get($profile, $field);
+            if (!$file) {
+                continue;
+            }
+
+            $url = parse_url($file);
+
+            $name = 'avatars/' . sprintf('%s_%d_%s', $profile['username'], $profile['id'], $field) . '.' . pathinfo($url['path'], PATHINFO_EXTENSION);
+            Storage::put($name, file_get_contents($file));
+            $avatars[$field] = $name;
+        }
+
+        return $avatars;
     }
 }

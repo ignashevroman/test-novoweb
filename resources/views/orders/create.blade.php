@@ -7,7 +7,7 @@
             <!-- Profile block -->
             <div class="profile d-flex align-items-center gap-3">
                 <input type="hidden" name="profile_id" value="{{ $profile->id }}">
-                <img src="https://via.placeholder.com/150" class="img-thumbnail" alt="Profile">
+                <img src="{{ asset($profile->profile_pic_url) }}" class="img-thumbnail" alt="Profile">
                 <a href="{{ $profile->url }}" target="_blank">{{ $profile->full_name ?? $profile->username }}</a>
             </div>
 
