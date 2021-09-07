@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Events\OrderCreated;
 use App\Models\States\Order\OrderState;
 use App\Models\Traits\UsesUuid;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,6 +25,8 @@ use Spatie\ModelStates\HasStates;
  * @property OrderState $state
  *
  * @property Profile $profile
+ *
+ * @method static Builder whereState(string $column, $states)
  */
 class Order extends Model
 {

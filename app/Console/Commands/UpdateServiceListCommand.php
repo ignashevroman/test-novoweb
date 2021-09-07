@@ -21,7 +21,7 @@ class UpdateServiceListCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command gets service list from the external api and saves them into DB';
+    protected $description = 'Command gets service list from the external API and saves them into DB';
 
     /**
      * Execute the console command.

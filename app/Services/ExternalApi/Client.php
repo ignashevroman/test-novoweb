@@ -70,7 +70,7 @@ class Client
      */
     public function getServices(): array
     {
-        return $this->request('', 'GET', [
+        return $this->request('just', 'GET', [
             'query' => ['action' => 'services']
         ]) ?? [];
     }
@@ -82,9 +82,21 @@ class Client
      */
     public function sendOrder(Order $order): ?array
     {
-        return $this->request('add', 'POST', [
+        return $this->request('just/add', 'POST', [
             'query' => ['action' => 'add'],
             'json' => $order->toArray(),
+        ]);
+    }
+
+    /**
+     * @param int $id
+     * @return array|null
+     * @throws ExternalApiException
+     */
+    public function getOrderStatus(int $id): ?array
+    {
+        return $this->request('just', 'GET', [
+            'query' => ['action' => 'status', 'order' => $id]
         ]);
     }
 }
