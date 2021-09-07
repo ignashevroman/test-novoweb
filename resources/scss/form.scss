@@ -1,0 +1,9 @@
+.form {
+    width: 100%;
+}
+
+@include media-breakpoint-up(xxl) {
+    .form {
+        width: 50%;
+    }
+}

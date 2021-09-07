@@ -100,6 +100,12 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
+
+        'external_api_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/external_api.log'),
+            'locking' => false,
+        ],
     ],
 
 ];
