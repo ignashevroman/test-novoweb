@@ -5,6 +5,7 @@ namespace App\Services\ExternalApi;
 
 
 use App\Exceptions\ExternalApiException;
+use App\Services\ExternalApi\DTO\Order;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
 
@@ -57,7 +58,7 @@ class Client
         try {
             $response = $this->client->request($method, $url, $options);
         } catch (GuzzleException $e) {
-            throw new ExternalApiException('Error while executing request', 0, $e, $url);
+            throw new ExternalApiException('Error while executing request. ' . $e->getMessage(), 0, $e, $url);
         }
 
         return json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
@@ -72,5 +73,18 @@ class Client
         return $this->request('', 'GET', [
             'query' => ['action' => 'services']
         ]) ?? [];
+    }
+
+    /**
+     * @param Order $order
+     * @return array|null
+     * @throws ExternalApiException
+     */
+    public function sendOrder(Order $order): ?array
+    {
+        return $this->request('add', 'POST', [
+            'query' => ['action' => 'add'],
+            'json' => $order->toArray(),
+        ]);
     }
 }

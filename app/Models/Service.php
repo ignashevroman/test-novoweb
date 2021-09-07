@@ -9,9 +9,15 @@ use Illuminate\Database\Eloquent\Model;
  * Class Service
  * @package App\Models
  *
+ * @property int $service
+ * @property string $name
+ * @property string $type
+ * @property string $category
  * @property int $rate
  * @property int $min
  * @property int $max
+ * @property bool $dripfeed
+ * @property int $average_time
  */
 class Service extends Model
 {
