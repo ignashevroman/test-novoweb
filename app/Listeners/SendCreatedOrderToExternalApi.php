@@ -4,12 +4,14 @@ namespace App\Listeners;
 
 use App\Events\OrderCreated;
 use App\Exceptions\ExternalApiException;
+use App\Models\States\Order\Processing;
 use App\Services\ExternalApi\Client;
 use App\Services\ExternalApi\DTO\Order;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use Spatie\ModelStates\Exceptions\CouldNotPerformTransition;
 use Throwable;
 
 class SendCreatedOrderToExternalApi implements ShouldQueue
@@ -60,7 +62,23 @@ class SendCreatedOrderToExternalApi implements ShouldQueue
         $this->log('info', 'Order send successfully. API respond with data (result)', $context);
 
         if ($externalId = Arr::get($result, 'order')) {
+            // Set external id to check status with
             $order->external_id = $externalId;
+
+            // Change order state to know that it's processing by the API
+            try {
+                $order->state->transitionTo(Processing::class);
+            } catch (CouldNotPerformTransition $e) {
+                $this->log(
+                    'error',
+                    'Failed to change order state to ' . Processing::$name . '. Reason: ' . $e->getMessage(),
+                    $context
+                );
+                $this->retry();
+                return;
+            }
+
+            // Save order
             try {
                 $order->saveOrFail();
             } catch (Throwable $e) {

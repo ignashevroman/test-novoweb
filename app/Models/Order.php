@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Events\OrderCreated;
+use App\Models\States\Order\OrderState;
 use App\Models\Traits\UsesUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\ModelStates\HasStates;
 
 /**
  * Class Order
@@ -19,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $quantity
  * @property double $charge
  * @property int $external_id
+ * @property OrderState $state
  *
  * @property Profile $profile
  */
@@ -26,6 +29,7 @@ class Order extends Model
 {
     use HasFactory;
     use UsesUuid;
+    use HasStates;
 
     /**
      * @var array
@@ -36,6 +40,10 @@ class Order extends Model
         'quantity_of_completed',
         'quantity',
         'charge',
+    ];
+
+    protected $casts = [
+        'state' => OrderState::class,
     ];
 
     /**
