@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $quantity_of_completed
  * @property int $quantity
  * @property double $charge
+ * @property int $external_id
  *
  * @property Profile $profile
  */
