@@ -53,5 +53,4 @@ artisan external-api:update-services
 Процесс отправки логируется в `storage/logs/external_api.log`. На выполнение есть 5 попыток с промежутком 5 минут.
 
 ## Обновление статуса заказа
-Для обновления статуса нужно использовать `cron`. Реализовал команду `external-api:update-orders-statuses`. Осталось 
-повесить ее в расписание и запустить `artisan schedule:run` на `cron`.
+Обновление статуса заказов происходит на `cron` каждые 5 минут, вызывается команда `external-api:update-orders-statuses`.

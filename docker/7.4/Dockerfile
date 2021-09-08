@@ -12,7 +12,7 @@ ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update \
-    && apt-get install -y gnupg gosu curl ca-certificates zip unzip git supervisor sqlite3 libcap2-bin libc-dev libxml2-dev libicu-dev libzip-dev libpng-dev \
+    && apt-get install -y gnupg gosu cron curl ca-certificates zip unzip git supervisor sqlite3 libcap2-bin libc-dev libxml2-dev libicu-dev libzip-dev libpng-dev \
     && mkdir -p ~/.gnupg \
     && chmod 600 ~/.gnupg \
     && echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf \
@@ -49,7 +49,11 @@ RUN useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
 COPY start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY php.ini /etc/php/7.4/cli/conf.d/99-sail.ini
-RUN chmod +x /usr/local/bin/start-container
+COPY crontab /etc/cron.d/crontab
+
+RUN chmod +x /usr/local/bin/start-container \
+	&& chmod 0644 /etc/cron.d/crontab \
+	&& crontab /etc/cron.d/crontab
 
 EXPOSE 8000
 
