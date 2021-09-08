@@ -1,64 +1,57 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Запуск
+```bash
+cp .env.example .env
+```
+Указать настройки БД в `.env`, а также `EXTERNAL_API_KEY` - ключ от внешнего API.
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Установить зависимости и выполнить миграции
+```bash
+composer instal
+vendor/bin/sail up
+vendor/bin/sail artisan migrate
+```
 
-## About Laravel
+# О проекте
+Проект "заказать продвижение instagram". Список услуг получаем из внешнего API. На главной странице поле для ввода ссылки
+на профиль instagram. При отправке формы происходит парсинг профиля и редирект на следующий шаг - создание заказа.
+Для указаного профиля выбираем услугу, количество подписчиков и отправляем форму. После обработки отправляемся на 
+страницу заказа.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Получение список услуг с API
+Для работы с внешним API сделал клиент `App\Services\ExternalApi\Client`. Его можно получить из DI контейнера.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Для получения списка услуг из внешнего API создана команда 
+```bash
+artisan external-api:update-services
+```
+После получения услуги сохраняются в базу данных. Если какая-либо услуга изменилась - она будет обновлена в БД.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Список услуг из БД можно получить с помощью запроса `GET /api/services`, в ответе json.
 
-## Learning Laravel
+## Парсинг Instagram
+`App\Services\InstaParser\Parser` - класс парсера. В нем можно описать абстрактные запросы, которые не зависят от какого
+бы то ни было контекста (то есть не затрагивают функционал фреймворка, модели и тд - простые запросы)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+`App\Services\InstaParser\InstaParser` - основной класс, который использует предыдущий для получения инфы из инсты. 
+В методах этого класса уже используются инструменты фреймворка и содержится "бизнес-логика". 
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Для парсинга стоит докрутить возможность использования прокси. 
 
-## Laravel Sponsors
+Результат парсинга URL кэшируется в `redis` на неделю, чтобы избежать лишних запросов. Кроме того, URL перед парсингом 
+очищается - приводится к минимально необходимой форме `protocol://host/path` - отсекаются GET аргументы. Таким образом 
+ссылки `https://www.instagram.com/zuck` и `https://www.instagram.com/zuck?hl=ru` обрабатываются как одна, соответственно
+количество лишних запросов к инсте также уменьшается.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## Создание заказа
+При создании заказа валидация проверяет наличие услуги, профиля и в допустимом ли диапазоне находится число подписчиков 
+для заказываемоей услуги.
 
-### Premium Partners
+Заказ создается в статусе `fresh` (также существуют `processing` и `completed`).
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[CMS Max](https://www.cmsmax.com/)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
+Событие создания обрабатывается листенером `SendCreatedOrderToExternalApi`, который обрабатывается в очереди на rabbitmq.
+Листенер отправляет заказ во внешнее API на выполнение. При успешной отправке заказ переводится в статус `processing`.
+Процесс отправки логируется в `storage/logs/external_api.log`. На выполнение есть 5 попыток с промежутком 5 минут.
 
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Обновление статуса заказа
+Для обновления статуса нужно использовать `cron`. Реализовал команду `external-api:update-orders-statuses`. Осталось 
+повесить ее в расписание и запустить `artisan schedule:run` на `cron`.
